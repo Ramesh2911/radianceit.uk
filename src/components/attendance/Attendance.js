@@ -346,7 +346,7 @@ const Attendance = (props) => {
    const exportToPDF = () => {
       const doc = new jsPDF();
 
-      const logoUrl = '/assets/images/logo.png';
+      const logoUrl = '/assets/images/logo.jpeg';
       doc.addImage(logoUrl, 'PNG', 10, 10, 40, 20);
 
       doc.setFontSize(16);

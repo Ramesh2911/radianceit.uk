@@ -21,9 +21,15 @@ function Sidebar(props) {
           <div className="m-header">
             <a href="/" className="b-brand">
               <img
-                src="/assets/images/logo.png"
+                src="/assets/images/logo.jpeg"
                 alt=""
                 className="logo logo-lg"
+                 style={{
+        width: "50%",      
+        height: "auto",       
+        objectFit: "contain",
+        display: "block"
+      }}
               />
             </a>
 

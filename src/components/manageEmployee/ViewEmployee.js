@@ -93,8 +93,8 @@ const ViewEmployee = (props) => {
                         <div className="col-xl-8 col-lg-8">
                            <div className="d-flex align-items-center justify-content-start">
                               <img
-                                 src={`${API_WEB_DOMAIN}/${empData.emp_pic}`}
-                                 alt=""
+                                 src={empData?.emp_pic}
+                                 alt="Employee Pic"
                                  className="admission-profile-thumb me-3"
                                  style={{
                                     width: '120px',
@@ -253,7 +253,7 @@ const ViewEmployee = (props) => {
                            <h5 className="fw-bold text-muted">Passport Document</h5>
                            {empData?.passport_doc ? (
                               <Link
-                                 to={`${API_WEB_DOMAIN}/${empData.passport_doc}`}
+                                 to={empData?.passport_doc}
                                  target="_blank"
                                  className="d-flex align-items-center"
                               >
@@ -281,7 +281,7 @@ const ViewEmployee = (props) => {
                            <h5 className="fw-bold text-muted">Visa/BRP Document</h5>
                            {empData?.visa_doc ? (
                               <Link
-                                 to={`${API_WEB_DOMAIN}/${empData?.visa_doc}`}
+                                 to={empData?.visa_doc}
                                  target="_blank"
                                  className="d-flex align-items-center"
                               >
@@ -315,7 +315,7 @@ const ViewEmployee = (props) => {
                            <h5 className="fw-bold text-muted">Proof of Address</h5>
                            {empData?.address_doc ? (
                               <Link
-                                 to={`${API_WEB_DOMAIN}/${empData?.address_doc}`}
+                                 to={empData?.address_doc}
                                  target="_blank"
                                  className="d-flex align-items-center"
                               >
@@ -329,7 +329,7 @@ const ViewEmployee = (props) => {
                            <h5 className="fw-bold text-muted">P45 Document</h5>
                            {empData?.p45_doc ? (
                               <Link
-                                 to={`${API_WEB_DOMAIN}/${empData?.p45_doc}`}
+                                 to={empData?.p45_doc}
                                  target="_blank"
                                  className="d-flex align-items-center"
                               >
@@ -343,7 +343,7 @@ const ViewEmployee = (props) => {
                            <h5 className="fw-bold text-muted">Other Document</h5>
                            {empData?.others_doc ? (
                               <Link
-                                 to={`${API_WEB_DOMAIN}/${empData?.others_doc}`}
+                                 to={empData?.others_doc}
                                  target="_blank"
                                  className="d-flex align-items-center"
                               >
@@ -357,7 +357,7 @@ const ViewEmployee = (props) => {
                            <h5 className="fw-bold text-muted">Right To Work</h5>
                            {empData?.work_check ? (
                               <Link
-                                 to={`${API_WEB_DOMAIN}/${empData?.work_check}`}
+                                 to={empData?.work_check}
                                  target="_blank"
                                  className="d-flex align-items-center"
                               >

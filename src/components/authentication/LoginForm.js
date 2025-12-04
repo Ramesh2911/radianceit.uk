@@ -27,6 +27,7 @@ function LoginForm(props) {
   const [passwordFormErrors, setPasswordFormErrors] = useState({});
   const [forgotPassword, setForgotPassword] = useState(false);
   const [btnEnable, setBtnEnable] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -199,13 +200,19 @@ function LoginForm(props) {
                 <i className="las la-lock"></i>
               </InputGroup.Text>
               <Form.Control
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="user_password"
                 placeholder="Password"
                 autoComplete="off"
                 value={formValues.user_password}
                 onChange={handleChange}
               />
+              <InputGroup.Text
+                style={{ cursor: "pointer" }}
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                <i className={showPassword ? "las la-eye" : "las la-eye-slash"}></i>
+              </InputGroup.Text>
             </InputGroup>
             <small className="error">
               {formValues.user_password === "" && formErrors.user_password}

@@ -7,7 +7,6 @@ import {
    API_FETCH_DOCUMENTS,
    API_LIST_EMPLOYEES,
    API_UPLOAD_DOCUMENTS,
-   API_WEB_DOMAIN
 }
    from '../../config/Api';
 import DataTable from 'react-data-table-component';
@@ -146,6 +145,8 @@ const Document = (props) => {
       const formData = new FormData();
       formData.append('doc_file', file);
       formData.append('send_to', formValues.send_to);
+      formData.append('first_name', firstName);
+      formData.append('last_name', lastName);
       formData.append('sender', roleName === "ADMIN" ? '1' : localStorage.getItem("emp_id"));
       formData.append('date', new Date().toISOString());
 
@@ -271,20 +272,32 @@ const Document = (props) => {
                      padding: '5px 10px',
                      cursor: 'pointer',
                   }}
-                  onClick={() => {
-                     const fileName = row.doc_file.split('-').slice(1).join('-');
-                     const blob = new Blob([row.doc_file_content], { type: 'application/octet-stream' });
-                     const link = document.createElement('a');
-                     link.href = URL.createObjectURL(blob);
-                     link.setAttribute('download', fileName);
-                     document.body.appendChild(link);
-                     link.click();
-                     document.body.removeChild(link);
-                  }}>
+                  onClick={async () => {
+                     try {
+                        const fileUrl = row.doc_file;
+                        const fileName = fileUrl.split('-').slice(1).join('-');
+
+                        const response = await fetch(fileUrl);
+                        if (!response.ok) {
+                           throw new Error("File not found");
+                        }
+                        const blob = await response.blob();
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.setAttribute('download', fileName);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                     } catch (error) {
+                        console.error("Error downloading file:", error);
+                        alert("Unable to download the file.");
+                     }
+                  }}
+               >
                   <i className="la la-download"></i>
                </button>
                <Link
-                  to={`${API_WEB_DOMAIN}/${row.doc_file}`}
+                  to={row.doc_file}
                   target="_blank"
                   style={{ marginRight: '10px' }}
                >

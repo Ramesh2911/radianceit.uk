@@ -15,7 +15,7 @@ function LoginScreen(props) {
               />
               <div className="img-card-side-content">
                 {/* <img
-                  src="/assets/images/logo.png"
+                  src="/assets/images/logo.jpeg"
                   alt="Logo dark"
                   className=""
                 /> */}

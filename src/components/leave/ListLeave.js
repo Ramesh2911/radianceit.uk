@@ -54,11 +54,21 @@ const ListLeave = (props) => {
       const { from_date, to_date } = formValues;
 
       if (from_date && to_date) {
-         const fromDate = new Date(from_date);
-         const toDate = new Date(to_date);
-         const timeDifference = toDate - fromDate;
-         const dayDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
-         setDuration(dayDifference + 1);
+         const start = new Date(from_date);
+         const end = new Date(to_date);
+         let count = 0;
+
+         const current = new Date(start);
+
+         while (current <= end) {
+            const day = current.getDay();
+            if (day !== 0 && day !== 6) {
+               count++;
+            }
+            current.setDate(current.getDate() + 1);
+         }
+
+         setDuration(count);
       } else {
          setDuration('');
       }

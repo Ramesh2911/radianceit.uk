@@ -65,45 +65,43 @@ const ListEmployee = (props) => {
       return designation ? designation.designation_name : "Unknown";
    };
 
-   const handleDeleteClick = (email) => {
-      Swal.fire({
-         title: "Are you sure?",
-         text: "You won't be able to revert this!",
-         icon: "warning",
-         showCancelButton: true,
-         confirmButtonColor: "#3085d6",
-         cancelButtonColor: "#d33",
-         confirmButtonText: "Yes, delete it!"
-      }).then((result) => {
-         if (result.isConfirmed) {
-
-            props.callRequest("DELETE", `${API_DELETE_EMPLOYEE}/${email}`, true)
-               .then((res) => {
-
-                  fetchEmployee();
-
-                  Swal.fire({
-                     title: "Deleted!",
-                     text: "Your file has been deleted.",
-                     icon: "success"
-                  });
-               })
-               .catch((e) => {
-                  if (e.response && e.response.data && e.response.data.error) {
-                     toast.error(e.response.data.error, {
-                        position: toast.POSITION.TOP_CENTER,
-                        autoClose: 5000,
-                     });
-                  } else {
-                     toast.error("Something went wrong. Please try again.", {
-                        position: toast.POSITION.TOP_CENTER,
-                        autoClose: 5000,
-                     });
-                  }
+  const handleDeleteClick = (email, fullName) => {
+   Swal.fire({
+      title: "Are you sure?",
+      text: `You want to delete employee ${fullName}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!"
+   }).then((result) => {
+      if (result.isConfirmed) {
+         props.callRequest("DELETE", `${API_DELETE_EMPLOYEE}/${email}`, true)
+            .then((res) => {
+               fetchEmployee();
+               Swal.fire({
+                  title: "Deleted!",
+                  text: `${fullName} has been deleted successfully.`,
+                  icon: "success"
                });
-         }
-      });
-   };
+            })
+            .catch((e) => {
+               if (e.response && e.response.data && e.response.data.error) {
+                  toast.error(e.response.data.error, {
+                     position: toast.POSITION.TOP_CENTER,
+                     autoClose: 5000,
+                  });
+               } else {
+                  toast.error("Something went wrong. Please try again.", {
+                     position: toast.POSITION.TOP_CENTER,
+                     autoClose: 5000,
+                  });
+               }
+            });
+      }
+   });
+};
+
 
    const columns = [
       {
@@ -226,7 +224,7 @@ const ListEmployee = (props) => {
                <Link to={`/employee/edit/${row.emp_id}`}>
                   <i className="la la-edit"></i>
                </Link>
-               <Link onClick={() => handleDeleteClick(row.email)}>
+               <Link onClick={() => handleDeleteClick(row.email, `${row.first_name} ${row.last_name}`)}>
                   <i className="la la-trash"></i>
                </Link>
             </>
