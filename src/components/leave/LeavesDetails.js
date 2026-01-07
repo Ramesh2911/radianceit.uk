@@ -9,6 +9,9 @@ import {
 
 const LeavesDetails = (props) => {
 
+   const currentYear = new Date().getFullYear();
+   const dateRange = `1 Jan ${currentYear} - 31 Dec ${currentYear}`;
+
    const [loadingIndicator, setLoadingIndicator] = useState(true);
    const [filterText, setFilterText] = useState("");
    const [leaveData, setLeaveData] = useState([]);
@@ -80,8 +83,12 @@ const LeavesDetails = (props) => {
    return (
       <>
          <div className="card">
-            <div className="card-header">
-               <h5>Leaves Details</h5>
+            <div className="card-header d-flex justify-content-between align-items-center">
+               <h5 className="mb-0">Leaves Details</h5>
+
+               <span className="text-muted fw-semibold">
+                  {dateRange}
+               </span>
             </div>
             <div className="card-body">
                <DataTable

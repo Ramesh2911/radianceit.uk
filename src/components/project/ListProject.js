@@ -219,46 +219,62 @@ const ListProject = (props) => {
       });
    };
 
+   const headerStyle = {
+      fontWeight: 600,
+      fontSize: "14px",
+   };
+
+   const truncateText = (text, length = 60) => {
+      if (!text) return "";
+      return text.length > length ? text.slice(0, length) + "..." : text;
+   };
+
    const columns = [
       {
-         name: <h5>Employee Name</h5>,
-         selector: (row) => getEmployeeName(row.project_assign_to),
-         sortable: true,
-      },
-      {
-         name: <h5>Project Name</h5>,
+         name: <span style={headerStyle}>Project Name</span>,
          selector: (row) => row.project_title,
-         sortable: true,
+         wrap: true,
+         width: "180px",
       },
       {
-         name: <h5>Project Description</h5>,
-         selector: (row) => row.project_description,
-         sortable: true,
+         name: <span style={headerStyle}>Project Description</span>,
+         cell: (row) => (
+            <span title={row.project_description}>
+               {truncateText(row.project_description, 80)}
+            </span>
+         ),
+         wrap: true,
+         grow: 3,
       },
       {
-         name: <h5>Start Date</h5>,
+         name: <span style={headerStyle}>Start Date</span>,
          selector: (row) => props.getFormatedDate(row.project_start_date),
-         sortable: true,
+         width: "120px",
       },
       {
-         name: <h5>End Date</h5>,
-         selector: (row) => {
-            return row.project_end_date ? props.getFormatedDate(row.project_end_date) : 'Ongoing';
-         },
-         sortable: true,
+         name: <span style={headerStyle}>End Date</span>,
+         selector: (row) =>
+            row.project_end_date
+               ? props.getFormatedDate(row.project_end_date)
+               : "Ongoing",
+         width: "120px",
       },
       {
-         name: <h5>Duration</h5>,
-         selector: (row) => {
-            if (!row.project_end_date) {
-            }
-            return getProjectDuration(row.project_start_date, row.project_end_date);
-         },
-         sortable: true,
+         name: <span style={headerStyle}>Duration</span>,
+         selector: (row) =>
+            getProjectDuration(row.project_start_date, row.project_end_date),
+         width: "140px",
       },
       {
-         name: <h6>Action</h6>,
+         name: <span style={headerStyle}>Employee Name</span>,
+         selector: (row) => getEmployeeName(row.project_assign_to),
+         width: "150px",
+         wrap: true,
+      },
+      {
+         name: <span style={headerStyle}>Action</span>,
          center: true,
+         width: "100px",
          cell: (row) => (
             <>
                <Link onClick={() => handleEditClick(row)}>
@@ -433,6 +449,9 @@ const ListProject = (props) => {
                      searchParam,
                      filterText
                   )}
+                  dense
+                  responsive={false}
+                  highlightOnHover
                   pagination
                   paginationPerPage={DataTableSettings.paginationPerPage}
                   paginationRowsPerPageOptions={
