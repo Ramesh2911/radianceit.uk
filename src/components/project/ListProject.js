@@ -253,12 +253,47 @@ const ListProject = (props) => {
       return text.length > length ? text.slice(0, length) + "..." : text;
    };
 
+   const isProjectCompleted = (endDate) => {
+      if (!endDate) return false;
+      const today = new Date();
+      const projectEnd = new Date(endDate);
+      return projectEnd < today;
+   };
+
+   const sortedProjectData = [...projectData].sort((a, b) => {
+      const aCompleted = isProjectCompleted(a.project_end_date);
+      const bCompleted = isProjectCompleted(b.project_end_date);
+
+      return aCompleted - bCompleted;
+   });
+
+
    const columns = [
+      // {
+      //    name: <span style={headerStyle}>Project Name</span>,
+      //    selector: (row) => row.project_title,
+      //    wrap: true,
+      //    width: "180px",
+      // },
       {
          name: <span style={headerStyle}>Project Name</span>,
          selector: (row) => row.project_title,
          wrap: true,
          width: "180px",
+         cell: (row) => {
+            const completed = isProjectCompleted(row.project_end_date);
+
+            return (
+               <span
+                  style={{
+                     color: completed ? "red" : "#000",
+                     fontWeight: completed ? "600" : "normal",
+                  }}
+               >
+                  {row.project_title}
+               </span>
+            );
+         },
       },
       {
          name: <span style={headerStyle}>Project Description</span>,
@@ -275,6 +310,14 @@ const ListProject = (props) => {
          selector: (row) => props.getFormatedDate(row.project_start_date),
          width: "120px",
       },
+      // {
+      //    name: <span style={headerStyle}>End Date</span>,
+      //    selector: (row) =>
+      //       row.project_end_date
+      //          ? props.getFormatedDate(row.project_end_date)
+      //          : "Ongoing",
+      //    width: "120px",
+      // },
       {
          name: <span style={headerStyle}>End Date</span>,
          selector: (row) =>
@@ -282,7 +325,19 @@ const ListProject = (props) => {
                ? props.getFormatedDate(row.project_end_date)
                : "Ongoing",
          width: "120px",
+         cell: (row) => {
+            const completed = isProjectCompleted(row.project_end_date);
+
+            return (
+               <span style={{ color: completed ? "red" : "inherit" }}>
+                  {row.project_end_date
+                     ? props.getFormatedDate(row.project_end_date)
+                     : "Ongoing"}
+               </span>
+            );
+         },
       },
+
       {
          name: <span style={headerStyle}>Duration</span>,
          selector: (row) =>
@@ -480,7 +535,7 @@ const ListProject = (props) => {
                <DataTable
                   columns={columns}
                   data={DataTableSettings.filterItems(
-                     projectData,
+                     sortedProjectData,
                      searchParam,
                      filterText
                   )}
