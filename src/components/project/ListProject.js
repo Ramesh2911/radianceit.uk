@@ -13,6 +13,7 @@ import {
 import { Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
+import Select from "react-select";
 
 const ListProject = (props) => {
 
@@ -21,7 +22,7 @@ const ListProject = (props) => {
       project_description: "",
       project_start_date: "",
       project_end_date: "",
-      project_assign_to: ""
+      project_assign_to: []
    };
 
    const [formValues, setFormValues] = useState(initialValues);
@@ -90,6 +91,26 @@ const ListProject = (props) => {
    const getEmployeeName = (assignedTo) => {
       const employee = employeeData.find(emp => emp.emp_id === assignedTo);
       return employee ? `${employee.first_name} ${employee.last_name}` : "Unknown";
+   };
+
+   const getAssignedEmployeeDisplay = (assignedTo) => {
+      if (!assignedTo) return { display: "—", tooltip: "" };
+
+      const empIds = assignedTo.split(",").filter(Boolean);
+
+      const names = empIds.map(id => getEmployeeName(id));
+
+      if (names.length === 1) {
+         return {
+            display: names[0],
+            tooltip: names[0]
+         };
+      }
+
+      return {
+         display: `${names[0]} +${names.length - 1}`,
+         tooltip: names.join("\n")
+      };
    };
 
    const handleChange = (e) => {
@@ -267,9 +288,19 @@ const ListProject = (props) => {
       },
       {
          name: <span style={headerStyle}>Employee Name</span>,
-         selector: (row) => getEmployeeName(row.project_assign_to),
-         width: "150px",
-         wrap: true,
+         selector: (row) => {
+            const { display, tooltip } = getAssignedEmployeeDisplay(
+               row.project_assign_to
+            );
+
+            return (
+               <span title={tooltip} style={{ cursor: "pointer" }}>
+                  {display}
+               </span>
+            );
+         },
+         width: "180px",
+         wrap: true
       },
       {
          name: <span style={headerStyle}>Action</span>,
@@ -408,27 +439,28 @@ const ListProject = (props) => {
                                     : ""}
                            </small>
                         </Form.Group>
-                        <Form.Group className="mb-3" controlId="project_assign_to">
+                        <Form.Group className="mb-3">
                            <Form.Label>Assign To</Form.Label>
-                           <select
-                              className="form-select"
-                              aria-label="Select Assign"
-                              name="project_assign_to"
-                              value={formValues.project_assign_to || ""}
-                              onChange={handleChange}
-                           >
-                              <option value="">
-                                 Select Name
-                              </option>
-                              {employeeData?.map((option, i) => (
-                                 <option key={i} value={option.emp_id}>
-                                    {`${option.first_name} ${option.last_name}`}
-                                 </option>
-                              ))}
-                           </select>
-                           <small className="error">
-                              {formValues.project_assign_to === "" && formErrors.project_assign_to}
-                           </small>
+                           <Select
+                              isMulti
+                              options={employeeData.map(emp => ({
+                                 value: emp.emp_id,
+                                 label: `${emp.first_name} ${emp.last_name}`
+                              }))}
+                              value={employeeData
+                                 .filter(emp => formValues.project_assign_to.includes(emp.emp_id))
+                                 .map(emp => ({
+                                    value: emp.emp_id,
+                                    label: `${emp.first_name} ${emp.last_name}`
+                                 }))
+                              }
+                              onChange={(selected) =>
+                                 setFormValues({
+                                    ...formValues,
+                                    project_assign_to: selected.map(opt => opt.value)
+                                 })
+                              }
+                           />
                         </Form.Group>
                         <div className="d-flex justify-content-end">
                            <Button
