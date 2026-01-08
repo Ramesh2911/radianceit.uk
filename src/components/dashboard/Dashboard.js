@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
    API_DEPARTMENT_COUNT,
    API_DESIGNATION_COUNT,
@@ -17,19 +17,67 @@ const Dashboard = (props) => {
    const roleName = localStorage.getItem("role_name");
    const empId = localStorage.getItem('emp_id');
 
-   const holidays = [
-      { date: '2024-01-01', name: "New Year's Day", day: 'Wednesday' },
-      { date: '2024-04-18', name: 'Good Friday', day: 'Friday' },
-      { date: '2024-04-21', name: 'Easter Monday', day: 'Monday' },
-      { date: '2024-05-05', name: 'Early May Bank Holiday', day: 'Monday' },
-      { date: '2024-05-26', name: 'Spring Bank Holiday', day: 'Monday' },
-      { date: '2024-08-25', name: 'Summer Bank Holiday', day: 'Monday' },
-      { date: '2024-12-25', name: 'Christmas Day', day: 'Thursday' },
-      { date: '2024-12-26', name: 'Boxing Day', day: 'Friday' },
-   ];
+   const getHolidaysByYear = useCallback((year) => {
+      const getDayName = (dateStr) =>
+         new Date(dateStr).toLocaleDateString("en-US", { weekday: "long" });
+
+      const getEasterSunday = (year) => {
+         const f = Math.floor;
+         const G = year % 19;
+         const C = Math.floor(year / 100);
+         const H = (C - Math.floor(C / 4) - Math.floor((8 * C + 13) / 25) + 19 * G + 15) % 30;
+         const I = H - Math.floor(H / 28) * (1 - Math.floor(29 / (H + 1)) * Math.floor((21 - G) / 11));
+         const J = (year + Math.floor(year / 4) + I + 2 - C + Math.floor(C / 4)) % 7;
+         const L = I - J;
+         const month = 3 + Math.floor((L + 40) / 44);
+         const day = L + 28 - 31 * Math.floor(month / 4);
+         return new Date(year, month - 1, day);
+      };
+
+      const getNthWeekdayOfMonth = (year, month, weekday, nth) => {
+         const firstDay = new Date(year, month, 1);
+         const offset = ((7 + weekday - firstDay.getDay()) % 7) + (nth - 1) * 7;
+         return new Date(year, month, 1 + offset).toISOString().split("T")[0];
+      };
+
+      const getLastWeekdayOfMonth = (year, month, weekday) => {
+         const lastDay = new Date(year, month + 1, 0);
+         const offset = (7 + lastDay.getDay() - weekday) % 7;
+         return new Date(year, month + 1, 0 - offset).toISOString().split("T")[0];
+      };
+
+      const easterSunday = getEasterSunday(year);
+      const format = (d) => d.toISOString().split("T")[0];
+
+      return [
+         { name: "New Year's Day", date: `${year}-01-01` },
+         { name: "Good Friday", date: format(new Date(easterSunday.getTime() - 2 * 86400000)) },
+         { name: "Easter Monday", date: format(new Date(easterSunday.getTime() + 86400000)) },
+         { name: "Early May Bank Holiday", date: getNthWeekdayOfMonth(year, 4, 1, 1) },
+         { name: "Spring Bank Holiday", date: getLastWeekdayOfMonth(year, 4, 1) },
+         { name: "Summer Bank Holiday", date: getLastWeekdayOfMonth(year, 7, 1) },
+         { name: "Christmas Day", date: `${year}-12-25` },
+         { name: "Boxing Day", date: `${year}-12-26` }
+      ].map(h => ({ ...h, day: getDayName(h.date) }));
+   }, []);
 
    const [upcomingHoliday, setUpcomingHoliday] = useState(null);
-   const [empCount, setEmpCount] = useState({ total_employees: 0, upcoming_birthdays: [] });
+
+   useEffect(() => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const year = today.getFullYear();
+      const holidays = getHolidaysByYear(year);
+
+      const nextHoliday = holidays
+         .sort((a, b) => new Date(a.date) - new Date(b.date))
+         .find(h => new Date(h.date) >= today);
+
+      setUpcomingHoliday(nextHoliday || null);
+   }, [getHolidaysByYear]);
+
+   const [empCount, setEmpCount] = useState({ total_employees: 0 });
    const [projectCount, setProjectCount] = useState(0);
    const [departmentCount, setDepartmentCount] = useState(0);
    const [designationCount, setDesignationCount] = useState(0);
@@ -39,120 +87,75 @@ const Dashboard = (props) => {
    const [designationData, setDesignationData] = useState([]);
 
    useEffect(() => {
-      const today = new Date();
-      const nextHoliday = holidays.find(holiday => new Date(holiday.date) > today);
-      setUpcomingHoliday(nextHoliday);
-   }, []);
-
-   useEffect(() => {
       if (roleName === "ADMIN") {
          fetchEmpCount();
          fetchProjectCount();
          fetchDepartmentCount();
          fetchDesignationCount();
-      } else if (roleName === "EMPLOYEE") {
+      } else {
          fetchDesignation();
          fetchDepartment();
          fetchProject();
          fetchEmpDetailsCount();
       }
-
    }, [roleName]);
 
    const fetchEmpCount = () => {
       props.callRequest("GET", API_EMPLOYEES_COUNT, true, null)
-         .then((res) => {
-            const result = res?.data?.data;
-            setEmpCount(result);
-         }).catch((e) => {
-            console.log(e);
-         });
+         .then(res => setEmpCount(res?.data?.data))
+         .catch(console.log);
    };
 
    const fetchProjectCount = () => {
       props.callRequest("GET", API_PROJECTS_COUNT, true, null)
-         .then((res) => {
-            const result = res?.data;
-            setProjectCount(result);
-         }).catch((e) => {
-            console.log(e);
-         });
+         .then(res => setProjectCount(res?.data))
+         .catch(console.log);
    };
 
    const fetchDepartmentCount = () => {
       props.callRequest("GET", API_DEPARTMENT_COUNT, true, null)
-         .then((res) => {
-            const result = res?.data;
-            setDepartmentCount(result);
-         }).catch((e) => {
-            console.log(e);
-         });
+         .then(res => setDepartmentCount(res?.data))
+         .catch(console.log);
    };
 
    const fetchDesignationCount = () => {
       props.callRequest("GET", API_DESIGNATION_COUNT, true, null)
-         .then((res) => {
-            const result = res?.data;
-            setDesignationCount(result);
-         }).catch((e) => {
-            console.log(e);
-         });
+         .then(res => setDesignationCount(res?.data))
+         .catch(console.log);
    };
 
    const fetchProject = () => {
       props.callRequest("GET", API_LIST_PROJECTS, true, null)
-         .then((res) => {
-            const sortedData = res.data?.data?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-            setProjectData(sortedData);
-         }).catch((e) => {
-            console.log(e);
-         });
+         .then(res => setProjectData(res?.data?.data || []))
+         .catch(console.log);
    };
 
    const fetchDepartment = () => {
       props.callRequest("GET", API_LIST_DEPARTMENT, true, null)
-         .then((res) => {
-            const sortedData = res.data?.data?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-            setDepartmentData(sortedData);
-         }).catch((e) => {
-            console.log(e);
-         });
+         .then(res => setDepartmentData(res?.data?.data || []))
+         .catch(console.log);
    };
 
    const fetchDesignation = () => {
       props.callRequest("GET", API_LIST_DESIGNATION, true, null)
-         .then((res) => {
-            const sortedData = res.data?.data?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-            setDesignationData(sortedData);
-         }).catch((e) => {
-            console.log(e);
-         });
+         .then(res => setDesignationData(res?.data?.data || []))
+         .catch(console.log);
    };
 
    const fetchEmpDetailsCount = () => {
-      props.callRequest("GET", (`${API_FETCH_EMPLOYEE}/${empId}`), true, null)
-         .then((res) => {
-            const result = res?.data?.data;
-            setEmpDetailsCount(result);
-         }).catch((e) => {
-            console.log(e);
-         });
+      props.callRequest("GET", `${API_FETCH_EMPLOYEE}/${empId}`, true, null)
+         .then(res => setEmpDetailsCount(res?.data?.data))
+         .catch(console.log);
    };
 
-   const getDepartmentName = (departmentId) => {
-      const department = departmentData.find((dept) => dept.id === Number(departmentId));
-      return department ? department.department_name : "Unknown Department";
-   };
+   const getDepartmentName = (id) =>
+      departmentData.find(d => d.id === Number(id))?.department_name || "Not Assigned";
 
-   const getDesignationName = (designationId) => {
-      const designation = designationData.find((dept) => dept.id === Number(designationId));
-      return designation ? designation.designation_name : "Unknown Designation";
-   };
+   const getDesignationName = (id) =>
+      designationData.find(d => d.id === Number(id))?.designation_name || "Not Assigned";
 
-   const getProjectName = (projectId) => {
-      const project = projectData.find((dept) => dept.id === Number(projectId));
-      return project ? project.project_title : "Project not assigned";
-   };
+   const getProjectName = (id) =>
+      projectData.find(p => p.id === Number(id))?.project_title || "Not Assigned";
 
    return (
       <>
