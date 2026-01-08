@@ -193,6 +193,9 @@ const ListProject = (props) => {
          project_start_date: project.project_start_date,
          project_end_date: project.project_end_date,
          project_assign_to: project.project_assign_to
+            ? project.project_assign_to.split(',')
+            : []
+
       });
       setCurrentId(project.id);
       setIsEditMode(true);

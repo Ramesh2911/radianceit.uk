@@ -18,23 +18,38 @@ function Sidebar(props) {
         className={showSidebar ? "pc-sidebar mob-sidebar-active" : "pc-sidebar"}
       >
         <div className="navbar-wrapper">
-          <div className="m-header">
-            <a href="/" className="b-brand">
+          <div
+            className="m-header"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "12px 0",
+              backgroundColor: "#aee0df" 
+            }}
+          >
+            <a
+              href="/"
+              className="b-brand"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+            >
               <img
-                src="/assets/images/logo.jpeg"
-                alt=""
-                className="logo logo-lg"
-                 style={{
-        width: "50%",      
-        height: "auto",       
-        objectFit: "contain",
-        display: "block"
-      }}
+                src="/assets/images/logo.png"  
+                alt="Radiance Logo"
+                style={{
+                  maxWidth: "180px",
+                  width: "100%",
+                  height: "auto",
+                  objectFit: "contain",
+                  display: "block"
+                }}
               />
             </a>
-
           </div>
-
           <div className="navbar-content">
             <li className="pc-item pc-caption">
               <label>&nbsp;</label>
